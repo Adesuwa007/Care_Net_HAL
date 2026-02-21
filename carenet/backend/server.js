@@ -2,17 +2,29 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const authMiddleware = require("./middleware/auth");
 const patientsRouter = require("./routes/patients");
 const schemesRouter = require("./routes/schemes");
 const transferRouter = require("./routes/transfer");
 const analyticsRouter = require("./routes/analytics");
 
 const app = express();
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 8000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 app.use(cors({ origin: FRONTEND_URL }));
 app.use(express.json());
+
+// Public routes (no auth required)
+app.use("/api/auth", require("./routes/auth"));
+
+// Health check (public)
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", uptime: process.uptime() });
+});
+
+// Protected routes (require valid JWT)
+app.use(authMiddleware);
 app.use(patientsRouter);
 app.use(schemesRouter);
 app.use(transferRouter);
@@ -34,3 +46,4 @@ mongoose
     console.error("MongoDB connection error:", err.message);
     process.exit(1);
   });
+

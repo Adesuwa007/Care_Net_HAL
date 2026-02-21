@@ -57,6 +57,17 @@ const patientSchema = new mongoose.Schema(
     latestRiskLevel: { type: String, default: "Unknown" },
     latestRiskProbability: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
+    aadhaarLast4: {
+      type: String,
+      minlength: 4,
+      maxlength: 4,
+      match: /^\d{4}$/,
+      default: null,
+    },
+    aadhaarVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

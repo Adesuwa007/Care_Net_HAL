@@ -5,16 +5,29 @@ const instance = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Attach JWT token to every request
 instance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   if (typeof window !== "undefined") {
     console.log("[CARE-NET API]", config.method?.toUpperCase(), config.url, config.params || config.data || "");
   }
   return config;
 });
 
+// Handle errors — auto-logout on 401
 instance.interceptors.response.use(
   (res) => res,
   (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
     const message = err.response?.data?.error || err.message || "Request failed";
     if (typeof window !== "undefined") {
       console.error("[CARE-NET API Error]", message);
@@ -86,3 +99,5 @@ export async function addAppointment(patientId, body) {
   const { data } = await instance.post(`/api/patients/${patientId}/appointment`, body);
   return data;
 }
+
+export default instance;

@@ -1,47 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Patient = require("../models/Patient");
-const { predictRisk } = require("../mlClient");
-
-function countMissedAppointments(appointments) {
-  if (!Array.isArray(appointments)) return 0;
-  return appointments.filter((a) => a.status === "missed").length;
-}
-
-async function runAssessmentAndSave(patient) {
-  const assessmentPayload = {
-    missed_appointments: countMissedAppointments(patient.appointments),
-    days_since_last_visit: patient.daysSinceLastVisit ?? 0,
-    financial_score: patient.financialScore ?? 5,
-    treatment_stage: patient.treatmentStage ?? 1,
-    follow_up_calls_received: patient.followUpCallsReceived ?? 0,
-    hospital_delay_days: patient.hospitalDelayDays ?? 0,
-    scheme_enrolled: patient.schemeEnrolled ? 1 : 0,
-  };
-  const result = await predictRisk({
-    ...patient.toObject?.() ?? patient,
-    missedAppointments: assessmentPayload.missed_appointments,
-    daysSinceLastVisit: assessmentPayload.days_since_last_visit,
-    financialScore: assessmentPayload.financial_score,
-    treatmentStage: assessmentPayload.treatment_stage,
-    followUpCallsReceived: assessmentPayload.follow_up_calls_received,
-    hospitalDelayDays: assessmentPayload.hospital_delay_days,
-    schemeEnrolled: assessmentPayload.scheme_enrolled === 1,
-  });
-  const riskEntry = {
-    assessedAt: new Date(),
-    riskLevel: result.risk_level,
-    riskProbability: result.risk_probability,
-    primaryReasons: result.primary_reasons || [],
-    recommendation: result.recommendation || "",
-  };
-  patient.riskAssessments = patient.riskAssessments || [];
-  patient.riskAssessments.push(riskEntry);
-  patient.latestRiskLevel = result.risk_level;
-  patient.latestRiskProbability = result.risk_probability;
-  await patient.save();
-  return patient;
-}
+const { runAssessmentAndSave } = require("../utils/assessRisk");
 
 router.get("/api/patients", async (req, res) => {
   try {
@@ -92,6 +52,8 @@ router.post("/api/patients", async (req, res) => {
       hospitalDelayDays: body.hospitalDelayDays ?? 0,
       appointments: body.appointments ?? [],
       medicalHistory: body.medicalHistory ?? [],
+      aadhaarLast4: body.aadhaarLast4 || null,
+      aadhaarVerified: body.aadhaarVerified ?? false,
     });
     if (body.initialDiagnosis) {
       patient.medicalHistory = patient.medicalHistory || [];
@@ -148,6 +110,8 @@ router.put("/api/patients/:id", async (req, res) => {
       "missedAppointments",
       "daysSinceLastVisit",
       "hospitalDelayDays",
+      "aadhaarLast4",
+      "aadhaarVerified",
     ];
     allowed.forEach((key) => {
       if (req.body[key] !== undefined) patient[key] = req.body[key];

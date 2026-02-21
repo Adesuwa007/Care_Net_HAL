@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Patient = require("../models/Patient");
-const { predictRisk } = require("../mlClient");
+const { runAssessmentAndSave } = require("../utils/assessRisk");
 
 const SCHEMES = {
   "Ayushman Bharat PM-JAY": {
@@ -48,44 +48,6 @@ const SCHEMES = {
   },
 };
 
-function countMissedAppointments(appointments) {
-  if (!Array.isArray(appointments)) return 0;
-  return appointments.filter((a) => a.status === "missed").length;
-}
-
-async function runAssessmentAndSave(patient) {
-  const payload = {
-    missed_appointments: countMissedAppointments(patient.appointments),
-    days_since_last_visit: patient.daysSinceLastVisit ?? 0,
-    financial_score: patient.financialScore ?? 5,
-    treatment_stage: patient.treatmentStage ?? 1,
-    follow_up_calls_received: patient.followUpCallsReceived ?? 0,
-    hospital_delay_days: patient.hospitalDelayDays ?? 0,
-    scheme_enrolled: patient.schemeEnrolled ? 1 : 0,
-  };
-  const result = await predictRisk({
-    ...patient.toObject?.(),
-    missedAppointments: payload.missed_appointments,
-    daysSinceLastVisit: payload.days_since_last_visit,
-    financialScore: payload.financial_score,
-    treatmentStage: payload.treatment_stage,
-    followUpCallsReceived: payload.follow_up_calls_received,
-    hospitalDelayDays: payload.hospital_delay_days,
-    schemeEnrolled: payload.scheme_enrolled === 1,
-  });
-  patient.riskAssessments = patient.riskAssessments || [];
-  patient.riskAssessments.push({
-    assessedAt: new Date(),
-    riskLevel: result.risk_level,
-    riskProbability: result.risk_probability,
-    primaryReasons: result.primary_reasons || [],
-    recommendation: result.recommendation || "",
-  });
-  patient.latestRiskLevel = result.risk_level;
-  patient.latestRiskProbability = result.risk_probability;
-  await patient.save();
-  return patient;
-}
 
 router.get("/api/schemes/recommend/:patientId", async (req, res) => {
   try {
