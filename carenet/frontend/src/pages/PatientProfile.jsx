@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { X, CheckCircle, ArrowLeft, Brain, Calendar, Building2, FileText, Shield } from "lucide-react";
+import { X, CheckCircle, ArrowLeft, Brain, Calendar, Building2, FileText, Shield, FileEdit } from "lucide-react";
 import RiskBadge from "../components/RiskBadge";
 import { getPatient, assessPatient, getSchemes, enrollScheme, addAppointment, getTransferHistory, transferPatient } from "../api/axios";
 import { generatePatientPDF } from "../utils/generatePDF";
@@ -178,8 +178,8 @@ export default function PatientProfile() {
                   <div
                     key={s}
                     className={`flex-1 h-2 rounded-full transition-all duration-500 ${s <= (patient.treatmentStage || 1)
-                        ? "bg-gradient-to-r from-cyan-500 to-blue-500"
-                        : "bg-slate-700/50"
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-500"
+                      : "bg-slate-700/50"
                       }`}
                   />
                 ))}
@@ -204,6 +204,14 @@ export default function PatientProfile() {
               >
                 <FileText className="w-4 h-4" />
                 Download Record
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate(`/prescription/${patient.patientId || patient._id}`)}
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 hover:from-purple-500/30 hover:to-indigo-500/30 text-purple-400 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border border-purple-500/20"
+              >
+                <FileEdit className="w-4 h-4" />
+                Create Prescription
               </button>
             </div>
           </div>
@@ -277,10 +285,10 @@ export default function PatientProfile() {
                         <td className="py-2.5">
                           <span
                             className={`rounded-full px-2 py-0.5 text-xs font-medium ${a.status === "completed"
-                                ? "bg-green-500/15 text-green-400"
-                                : a.status === "missed"
-                                  ? "bg-red-500/15 text-red-400"
-                                  : "bg-slate-600/50 text-slate-300"
+                              ? "bg-green-500/15 text-green-400"
+                              : a.status === "missed"
+                                ? "bg-red-500/15 text-red-400"
+                                : "bg-slate-600/50 text-slate-300"
                               }`}
                           >
                             {a.status || "scheduled"}

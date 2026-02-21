@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Patient = require("../models/Patient");
 const { runAssessmentAndSave } = require("../utils/assessRisk");
+const { createLog } = require("../middleware/logger");
 
 
 router.post("/api/transfer/:patientId", async (req, res) => {
@@ -45,6 +46,15 @@ router.post("/api/transfer/:patientId", async (req, res) => {
     await patient.save();
     await runAssessmentAndSave(patient);
     const updated = await Patient.findById(patient._id);
+    await createLog({
+      type: "RECORD_TRANSFERRED",
+      username: req.user?.username || "system",
+      role: req.user?.role || "",
+      description: `Records transferred for ${updated.name} from ${prevHospital} to ${newHospital}`,
+      patientId: updated.patientId,
+      patientName: updated.name,
+      status: "SUCCESS"
+    });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });

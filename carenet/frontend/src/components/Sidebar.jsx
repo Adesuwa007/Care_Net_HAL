@@ -9,14 +9,21 @@ import {
   BookOpen,
   LogOut,
   ChevronRight,
+  BarChart3,
+  MapPin,
+  Activity,
 } from "lucide-react";
+import { logoutUser } from "../api/axios";
 
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard", description: "Overview & analytics" },
+  { to: "/analytics", icon: BarChart3, label: "Analytics", description: "Live charts & insights" },
   { to: "/patients", icon: Users, label: "Patients", description: "Browse all patients" },
   { to: "/patients/new", icon: UserPlus, label: "Add Patient", description: "Register new patient" },
   { to: "/transfer", icon: ArrowLeftRight, label: "Transfers", description: "Hospital transfers" },
+  { to: "/nearby", icon: MapPin, label: "Nearby Services", description: "Pharmacies & emergency" },
   { to: "/schemes", icon: BookOpen, label: "Schemes", description: "Government programs" },
+  { to: "/logs", icon: Activity, label: "System Logs", description: "Activity audit trail" },
 ];
 
 const getUserInitials = (username) => {
@@ -38,9 +45,13 @@ export default function Sidebar() {
     if (stored) user = JSON.parse(stored);
   } catch (_) { }
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const handleLogout = async () => {
+    if (user) {
+      await logoutUser(user.username, user.role);
+    } else {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
     navigate("/login");
   };
 
@@ -77,7 +88,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1.5">
+      <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
         <p className="text-slate-500 text-[10px] font-semibold uppercase tracking-widest mb-3 px-3">
           Navigation
         </p>
@@ -95,8 +106,8 @@ export default function Sidebar() {
           >
             <div
               className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 ${location.pathname === to || (to !== "/" && location.pathname.startsWith(to))
-                  ? "bg-cyan-500/20"
-                  : "bg-slate-800/50 group-hover:bg-slate-700/50"
+                ? "bg-cyan-500/20"
+                : "bg-slate-800/50 group-hover:bg-slate-700/50"
                 }`}
             >
               <Icon className="w-4.5 h-4.5 shrink-0" />
@@ -109,8 +120,8 @@ export default function Sidebar() {
             </div>
             <ChevronRight
               className={`w-4 h-4 transition-all duration-200 ${location.pathname === to || (to !== "/" && location.pathname.startsWith(to))
-                  ? "opacity-100 text-cyan-500"
-                  : "opacity-0 group-hover:opacity-50"
+                ? "opacity-100 text-cyan-500"
+                : "opacity-0 group-hover:opacity-50"
                 }`}
             />
           </NavLink>
@@ -136,3 +147,4 @@ export default function Sidebar() {
     </aside>
   );
 }
+

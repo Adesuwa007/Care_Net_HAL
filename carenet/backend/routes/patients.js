@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Patient = require("../models/Patient");
 const { runAssessmentAndSave } = require("../utils/assessRisk");
+const { createLog } = require("../middleware/logger");
 
 router.get("/api/patients", async (req, res) => {
   try {
@@ -69,6 +70,15 @@ router.post("/api/patients", async (req, res) => {
     await patient.save();
     await runAssessmentAndSave(patient);
     const updated = await Patient.findById(patient._id);
+    await createLog({
+      type: "PATIENT_CREATED",
+      username: req.user?.username || "system",
+      role: req.user?.role || "",
+      description: `New patient ${updated.name} (${updated.patientId}) added`,
+      patientId: updated.patientId,
+      patientName: updated.name,
+      status: "SUCCESS"
+    });
     res.status(201).json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -146,6 +156,15 @@ router.post("/api/patients/:id/assess", async (req, res) => {
     if (!patient) return res.status(404).json({ error: "Patient not found" });
     await runAssessmentAndSave(patient);
     const updated = await Patient.findById(patient._id);
+    await createLog({
+      type: "RISK_ASSESSED",
+      username: req.user?.username || "system",
+      role: req.user?.role || "",
+      description: `Risk assessed for ${updated.name}: ${updated.latestRiskLevel} (${updated.latestRiskProbability}%)`,
+      patientId: updated.patientId,
+      patientName: updated.name,
+      status: "SUCCESS"
+    });
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -100,4 +100,14 @@ export async function addAppointment(patientId, body) {
   return data;
 }
 
+export const logoutUser = async (username, role) => {
+  try {
+    await instance.post("/api/auth/logout", { username, role });
+  } catch (e) {
+    /* silent fail */
+  }
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+};
+
 export default instance;

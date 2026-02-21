@@ -82,4 +82,27 @@ router.get("/api/analytics/trends", async (req, res) => {
   res.json(trends);
 });
 
+router.get("/api/analytics/stage-breakdown", async (req, res) => {
+  try {
+    const stages = await Patient.aggregate([
+      { $match: { isActive: { $ne: false } } },
+      { $group: { _id: "$treatmentStage", count: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]);
+    const labels = {
+      1: "Stage 1 - Early",
+      2: "Stage 2 - Progressing",
+      3: "Stage 3 - Advanced",
+      4: "Stage 4 - Final",
+    };
+    const result = [1, 2, 3, 4].map((s) => {
+      const found = stages.find((st) => st._id === s);
+      return { stage: s, label: labels[s], count: found ? found.count : 0 };
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

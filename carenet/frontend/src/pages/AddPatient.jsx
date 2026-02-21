@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserPlus, ArrowRight, Brain, Sparkles } from "lucide-react";
+import { UserPlus, ArrowRight, Brain, Sparkles, ScanLine, Upload, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import RiskBadge from "../components/RiskBadge";
 import { createPatient } from "../api/axios";
+import api from "../api/axios";
 
 const DISEASES = ["TB", "Diabetes", "Hypertension", "Maternal Care", "Cancer", "Other"];
 const GENDERS = ["Male", "Female", "Other"];
@@ -27,6 +28,54 @@ export default function AddPatient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+
+  // Aadhaar scan state
+  const [aadhaarImage, setAadhaarImage] = useState(null);
+  const [aadhaarPreview, setAadhaarPreview] = useState(null);
+  const [scanning, setScanning] = useState(false);
+  const [scanResult, setScanResult] = useState(null);
+  const [scanError, setScanError] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleAadhaarUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setScanError("Please upload an image file.");
+      return;
+    }
+    setScanError(null);
+    setScanResult(null);
+    setAadhaarPreview(URL.createObjectURL(file));
+    const reader = new FileReader();
+    reader.onload = () => setAadhaarImage(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const scanAadhaar = async () => {
+    if (!aadhaarImage) return;
+    setScanning(true);
+    setScanError(null);
+    setScanResult(null);
+    try {
+      const base64 = aadhaarImage.split(",")[1];
+      const mediaType = aadhaarImage.split(";")[0].split(":")[1];
+      const { data } = await api.post("/api/aadhaar/scan", { image: base64, mediaType });
+      setScanResult(data);
+      // Auto-fill form with extracted data
+      setForm((prev) => ({
+        ...prev,
+        name: data.name || prev.name,
+        age: data.age || prev.age,
+        gender: data.gender || prev.gender,
+        aadhaarLast4: data.aadhaarLast4 || prev.aadhaarLast4,
+      }));
+    } catch (err) {
+      setScanError(err?.response?.data?.error || "Failed to scan Aadhaar. Please enter details manually.");
+    } finally {
+      setScanning(false);
+    }
+  };
 
   const handleChange = (field, value) => {
     setError(null);
@@ -68,12 +117,87 @@ export default function AddPatient() {
   return (
     <div className="p-8 animate-fadeIn">
       <div className="flex items-center gap-3 mb-8 animate-fadeInUp">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 flex items-center justify-center border border-cyan-500/20">
-          <UserPlus className="w-5 h-5 text-cyan-400" />
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <UserPlus className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Add Patient</h1>
-          <p className="text-slate-400 mt-0.5">Register a new patient and get instant AI risk assessment</p>
+          <h1 className="text-2xl font-bold text-white">Add New Patient</h1>
+          <p className="text-slate-400 text-sm">Register a new patient for AI-powered risk assessment</p>
+        </div>
+      </div>
+
+      {/* Aadhaar Scan Section */}
+      <div className="glass-card p-6 mb-6 animate-fadeInUp">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+            <ScanLine className="w-5 h-5 text-orange-400" />
+          </div>
+          <div>
+            <h2 className="text-white font-bold text-lg">Aadhaar Auto-Fill</h2>
+            <p className="text-slate-400 text-xs">Upload Aadhaar card image to auto-extract patient details using AI</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-4">
+          <div className="flex-1">
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleAadhaarUpload}
+              className="hidden"
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-slate-700/50 border border-slate-600/50 text-white rounded-xl px-5 py-2.5 text-sm flex items-center gap-2 hover:bg-slate-600/50 transition-all"
+              >
+                <Upload className="w-4 h-4" />
+                {aadhaarPreview ? "Change Image" : "Upload Aadhaar"}
+              </button>
+              {aadhaarImage && (
+                <button
+                  type="button"
+                  onClick={scanAadhaar}
+                  disabled={scanning}
+                  className="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl px-5 py-2.5 text-sm font-semibold flex items-center gap-2 disabled:opacity-50 transition-all hover:shadow-lg hover:shadow-orange-500/20"
+                >
+                  {scanning ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Scanning...</>
+                  ) : (
+                    <><ScanLine className="w-4 h-4" /> Scan & Extract</>
+                  )}
+                </button>
+              )}
+            </div>
+            {aadhaarPreview && (
+              <img
+                src={aadhaarPreview}
+                alt="Aadhaar preview"
+                className="mt-3 max-h-40 rounded-xl border border-slate-700 object-contain"
+              />
+            )}
+          </div>
+          {scanResult && (
+            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex-1">
+              <div className="flex items-center gap-2 text-green-400 font-semibold text-sm mb-2">
+                <CheckCircle className="w-4 h-4" /> Data Extracted Successfully
+              </div>
+              <div className="text-slate-300 text-xs space-y-1">
+                {scanResult.name && <p>Name: <span className="text-white font-medium">{scanResult.name}</span></p>}
+                {scanResult.age && <p>Age: <span className="text-white font-medium">{scanResult.age}</span></p>}
+                {scanResult.gender && <p>Gender: <span className="text-white font-medium">{scanResult.gender}</span></p>}
+                {scanResult.aadhaarLast4 && <p>Aadhaar Last 4: <span className="text-white font-medium">{scanResult.aadhaarLast4}</span></p>}
+              </div>
+              <p className="text-slate-500 text-[10px] mt-2">Verify and complete the form below</p>
+            </div>
+          )}
+          {scanError && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex-1 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <p className="text-red-400 text-sm">{scanError}</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -190,8 +314,8 @@ export default function AddPatient() {
                   <div
                     key={s}
                     className={`w-8 h-2 rounded-full ${s <= form.treatmentStage
-                        ? "bg-gradient-to-r from-cyan-500 to-blue-500"
-                        : "bg-slate-700/50"
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-500"
+                      : "bg-slate-700/50"
                       }`}
                   />
                 ))}
