@@ -3,7 +3,7 @@
 
 <div align="center">
 
-![CARE-NET Banner](./screenshots/banner.png)
+<img width="600" height="200" alt="carenetbanner" src="https://github.com/user-attachments/assets/51893883-9e42-4b81-be74-a3e6be3d7318" />
 
 > *"In India, nearly 50% of chronic disease patients drop out of treatment midway — not because they want to, but because the system fails them. CARE-NET fixes that."*
 
@@ -19,47 +19,53 @@
 ## 📸 Screenshots
 
 ### Dashboard
-![Dashboard](./screenshots/dashboard.png)
+<img width="618" height="314" alt="Screenshot 2026-02-22 at 3 39 56 AM" src="https://github.com/user-attachments/assets/d5ca35a9-eb9f-4596-a7c2-dc1b663c33b6" />
+
 > *Real-time overview — total patients, risk distribution donut chart, high-risk alerts, and disease breakdown table*
 
 ### Patient List
-![Patient List](./screenshots/patients.png)
+<img width="618" height="314" alt="Screenshot 2026-02-22 at 3 40 32 AM" src="https://github.com/user-attachments/assets/f2b153e1-63c3-4042-8911-c27582cef0ba" />
+
 > *Full patient registry with search, risk-level filtering, and color-coded badges*
 
 ### Patient Profile
-![Patient Profile](./screenshots/patient-profile.png)
+<img width="618" height="314" alt="Screenshot 2026-02-22 at 3 40 46 AM" src="https://github.com/user-attachments/assets/a8170453-bf4c-45d4-a787-572fc2cc6aeb" />
+
 > *Complete patient view — AI risk score with reasons, treatment timeline, scheme recommendations, and Aadhaar identity card*
 
 ### Add Patient with Aadhaar Scan
-![Add Patient](./screenshots/add-patient.png)
+<img width="618" height="314" alt="Screenshot 2026-02-22 at 3 40 53 AM" src="https://github.com/user-attachments/assets/d510665b-0097-48d0-8cf6-9bedbeb60ff9" />
+
 > *Upload Aadhaar card photo → AI auto-fills patient details instantly*
 
 ### Transfer Records
-![Transfer Records](./screenshots/transfer.png)
+<img width="618" height="314" alt="Screenshot 2026-02-22 at 3 40 57 AM" src="https://github.com/user-attachments/assets/34c4c552-0063-4df0-94e0-cfaeb7761a06" />
+
 > *Seamless cross-hospital medical record transfer with full history preservation*
 
 ### Analytics
-![Analytics](./screenshots/analytics.png)
+<img width="618" height="314" alt="Screenshot 2026-02-22 at 3 40 19 AM" src="https://github.com/user-attachments/assets/425f74a0-44af-4f4d-92d5-6fb708c8863a" />
+
 > *6 live charts — risk trends, disease breakdown, hospital load, treatment stage distribution*
 
 ### Government Health Schemes
-![Schemes](./screenshots/schemes.png)
+<img width="618" height="314" alt="Screenshot 2026-02-22 at 3 41 11 AM" src="https://github.com/user-attachments/assets/b49d0eb9-7bf7-462d-b024-0a227f26a112" />
+
 > *Browse and enroll in 8 major Indian government healthcare schemes*
 
 ### Nearby Services
-![Nearby Services](./screenshots/nearby.png)
+<img width="618" height="314" alt="Screenshot 2026-02-22 at 3 41 06 AM" src="https://github.com/user-attachments/assets/bc6a4c8d-ee95-45a6-85fc-487e6bbbd16b" />
+
 > *GPS-powered Jan Aushadhi store finder and emergency ambulance locator*
 
-### Prescription Generator
-![Prescription](./screenshots/prescription.png)
-> *Digital prescription creator with live preview and PDF download*
-
 ### System Logs
-![System Logs](./screenshots/logs.png)
+<img width="618" height="314" alt="Screenshot 2026-02-22 at 3 41 15 AM" src="https://github.com/user-attachments/assets/e5592bfb-ab4a-4da6-a9ed-58cd87ec9784" />
+
 > *Full audit trail — login/logout timestamps, patient events, and activity monitoring*
 
 ### CARE-NET Chatbot
-![Chatbot](./screenshots/chatbot.png)
+<img width="200" height="260" alt="Screenshot 2026-02-22 at 3 42 20 AM" src="https://github.com/user-attachments/assets/dd46ff0d-0467-4408-a6d5-28b809902b98" />
+
 > *AI-powered navigation assistant that guides users through every feature*
 
 ---
